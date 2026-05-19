@@ -1,0 +1,92 @@
+.overview-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.grid-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-charts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.chart-card {
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.chart-subtitle {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.chart-container {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}
+
+.pie-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pie-center-text {
+  position: absolute;
+  text-align: center;
+  pointer-events: none;
+}
+
+.grid-2-1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+.bg-gray-50 {
+  background-color: #f9fafb;
+}
+
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.border-gray-100 {
+  border-color: #f3f4f6;
+}
+
+/* Specific utilities for Overview */
+.text-purple-500 {
+  color: #8b5cf6;
+}
+
+@media (max-width: 1200px) {
+  .grid-stats, .grid-charts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-2-1 {
+    grid-template-columns: 1fr;
+  }
+}

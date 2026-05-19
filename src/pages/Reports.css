@@ -1,0 +1,83 @@
+.reports-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  width: 300px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.tab-btn {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding-bottom: 0.5rem;
+}
+
+.tab-btn.active {
+  color: var(--color-text-main);
+}
+
+.tab-count {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  font-weight: normal;
+}
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--color-success);
+  color: var(--color-surface);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.add-btn:hover {
+  background-color: #16a34a;
+}
+
+.filters-row {
+  background-color: var(--color-surface);
+}
+
+.filter-btn {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 0.5rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.filter-btn.active {
+  color: var(--color-success);
+  border-bottom-color: var(--color-success);
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
