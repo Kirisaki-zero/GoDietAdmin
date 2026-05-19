@@ -4,6 +4,7 @@ import Overview from './pages/Overview';
 import Reports from './pages/Reports';
 import Fitness from './pages/Fitness';
 import Foods from './pages/Foods';
+import Users from './pages/Users';
 import Login from './pages/Login';
 import './App.css';
 
@@ -37,6 +38,7 @@ function App() {
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/fitness" element={<Fitness />} />
                     <Route path="/foods" element={<Foods />} />
+                    <Route path="/users" element={<Users />} />
                   </Routes>
                 </main>
               </div>
