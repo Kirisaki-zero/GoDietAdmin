@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, Activity, Target, UserPlus, Scale, Flame, RefreshCcw } from 'lucide-react';
 import StatCard from '../components/StatCard';
@@ -40,15 +41,24 @@ const complianceData = [
   { name: 'W7', rate: 87 },
 ];
 
-const topPerformers = [
-  { id: '#1', name: 'Sarah Wijaya', initials: 'SW', program: 'Fat Loss', streak: '21d', compliance: 92, avatarClass: 'avatar-sw' },
-  { id: '#2', name: 'Andi Pratama', initials: 'AP', program: 'Muscle Gain', streak: '14d', compliance: 88, avatarClass: 'avatar-ap' },
-  { id: '#3', name: 'Dewi Lestari', initials: 'DL', program: 'Fat Loss', streak: '18d', compliance: 85, avatarClass: 'avatar-dl' },
-  { id: '#4', name: 'Budi Santoso', initials: 'BS', program: 'Maintenance', streak: '10d', compliance: 82, avatarClass: 'avatar-bs' },
-  { id: '#5', name: 'Rina Kusuma', initials: 'RK', program: 'Health', streak: '12d', compliance: 79, avatarClass: 'avatar-rk' },
-];
+const allPerformers = [
+    { id: '#1', name: 'Sarah Wijaya', initials: 'SW', program: 'Fat Loss', streak: '21d', compliance: 92, avatarClass: 'avatar-sw', status: 'On Track' },
+    { id: '#2', name: 'Andi Pratama', initials: 'AP', program: 'Muscle Gain', streak: '14d', compliance: 88, avatarClass: 'avatar-ap', status: 'On Track' },
+    { id: '#3', name: 'Dewi Lestari', initials: 'DL', program: 'Fat Loss', streak: '5d', compliance: 75, avatarClass: 'avatar-dl', status: 'Perlu Perhatian' },
+    { id: '#4', name: 'Budi Santoso', initials: 'BS', program: 'Maintenance', streak: '2d', compliance: 55, avatarClass: 'avatar-bs', status: 'Tidak Aktif' },
+    { id: '#5', name: 'Rina Kusuma', initials: 'RK', program: 'Health', streak: '12d', compliance: 79, avatarClass: 'avatar-rk', status: 'Perlu Perhatian' },
+    { id: '#6', name: 'Eko Prasetyo', initials: 'EP', program: 'Muscle Gain', streak: '30d', compliance: 95, avatarClass: 'avatar-ep', status: 'On Track' },
+    { id: '#7', name: 'Siti Aminah', initials: 'SA', program: 'Fat Loss', streak: '1d', compliance: 40, avatarClass: 'avatar-sa', status: 'Tidak Aktif' },
+  ];
 
 const Overview = () => {
+  const [activeFilter, setActiveFilter] = useState('Semua');
+
+  const filteredPerformers = allPerformers.filter(p => {
+    if (activeFilter === 'Semua') return true;
+    return p.status === activeFilter;
+  });
+
   return (
     <div className="overview-page fade-in">
       <h1 className="page-title">Dashboard Admin</h1>
@@ -126,44 +136,47 @@ const Overview = () => {
 
       {/* Charts Row 2 */}
       <div className="grid-charts">
-        <div className="card chart-card flex items-center justify-center relative">
-          <div className="absolute top-4 left-4">
-             <h3 className="chart-title">Distribusi Program Diet</h3>
+      <div className="card chart-card">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="chart-title">Distribusi Program Diet</h3>
+              <p className="chart-subtitle">Berdasarkan program yang diikuti</p>
+            </div>
+            <div className="badge badge-info">Total 1,840</div>
           </div>
-          <div className="flex w-full h-full items-center">
-             <div className="pie-container" style={{width: '50%', height: '200px'}}>
-               <ResponsiveContainer width="100%" height="100%">
-                 <PieChart>
-                   <Pie
-                     data={programData}
-                     innerRadius={60}
-                     outerRadius={80}
-                     paddingAngle={5}
-                     dataKey="value"
-                   >
-                     {programData.map((entry, index) => (
-                       <Cell key={`cell-${index}`} fill={entry.color} />
-                     ))}
-                   </Pie>
-                   <Tooltip />
-                 </PieChart>
-               </ResponsiveContainer>
-               <div className="pie-center-text">
-                 <div className="font-bold text-xl">1,840</div>
-                 <div className="text-xs text-muted">total users</div>
-               </div>
-             </div>
-             <div className="legend-container pl-4">
-               {programData.map(item => (
-                 <div key={item.name} className="legend-item mb-2">
-                   <div className="flex items-center gap-2">
-                     <span className="status-dot" style={{backgroundColor: item.color}}></span>
-                     <span className="text-sm font-medium">{item.name}</span>
-                   </div>
-                   <div className="text-lg font-bold ml-4">{item.value}%</div>
-                 </div>
-               ))}
-             </div>
+          <div className="flex w-full items-center">
+            <div className="pie-container relative" style={{width: '40%', height: '200px'}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={programData}
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {programData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="pie-center-text">
+                <Users size={24} className="text-muted" />
+              </div>
+            </div>
+            <div className="legend-container flex-1 pl-4">
+              {programData.map(item => (
+                <div key={item.name} className="legend-item flex justify-between items-center mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="status-dot" style={{backgroundColor: item.color}}></span>
+                    <span className="text-sm font-medium">{item.name}</span>
+                  </div>
+                  <div className="text-sm font-bold">{item.value}%</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -198,14 +211,22 @@ const Overview = () => {
       {/* Performers and Notifications */}
       <div className="grid-2-1 mt-6">
         <div className="card">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold">Top Performers Minggu Ini</h3>
-            <a href="#" className="text-success text-sm font-semibold flex items-center gap-1">
-              Lihat Semua ↗
-            </a>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold">Pantauan Kebugaran User</h3>
+            <div className="filter-tabs flex items-center gap-2 p-1 bg-gray-100 rounded-full">
+                {['Semua', 'On Track', 'Perlu Perhatian', 'Tidak Aktif'].map(filter => (
+                    <button 
+                        key={filter}
+                        onClick={() => setActiveFilter(filter)}
+                        className={`px-3 py-1 text-sm font-semibold rounded-full transition-colors ${activeFilter === filter ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        {filter}
+                    </button>
+                ))}
+            </div>
           </div>
           <div className="performers-list">
-            {topPerformers.map(p => (
+            {filteredPerformers.map(p => (
               <div key={p.id} className="performer-item flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
                 <div className="flex items-center gap-4">
                   <span className="text-muted text-sm font-medium w-6">{p.id}</span>
@@ -221,10 +242,10 @@ const Overview = () => {
                   </div>
                   <div className="w-24">
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="font-semibold text-success">{p.compliance}%</span>
+                      <span className={`font-semibold ${p.status === 'On Track' ? 'text-success' : p.status === 'Perlu Perhatian' ? 'text-warning' : 'text-danger'}`}>{p.compliance}%</span>
                     </div>
                     <div className="progress-bar-container">
-                      <div className="progress-bar bg-success" style={{width: `${p.compliance}%`, backgroundColor: '#22c55e'}}></div>
+                      <div className={`progress-bar ${p.status === 'On Track' ? 'bg-success' : p.status === 'Perlu Perhatian' ? 'bg-warning' : 'bg-danger'}`} style={{width: `${p.compliance}%`}}></div>
                     </div>
                   </div>
                 </div>
