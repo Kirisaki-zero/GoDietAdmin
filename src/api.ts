@@ -84,7 +84,33 @@ export async function deleteFood(id_makanan: string) {
   return res.json();
 }
 
+// ── REPORTS ──────────────────────────────────────────────────────────
+
+export async function fetchReports() {
+  const res = await fetch(`${BASE_URL}/api/admin/reports`, { headers: adminHeaders() });
+  return res.json();
+}
+
+export async function deleteReport(id_report: string) {
+  const res = await fetch(`${BASE_URL}/api/admin/reports/${id_report}`, {
+    method: 'DELETE',
+    headers: adminHeaders(),
+  });
+  return res.json();
+}
+
 // ── TYPES ─────────────────────────────────────────────────────────────
+
+export interface Report {
+  id_report: string;
+  id_user: string;
+  username: string;
+  judul: string;
+  isi_laporan: string;
+  kategori: string;
+  status: string;
+  created_at: string;
+}
 
 export interface FoodPayload {
   nama_makanan: string;

@@ -254,29 +254,41 @@ const Overview = () => {
           </div>
         </div>
 
-        <div className="card">
-          <h3 className="font-bold mb-4">Notifikasi Terbaru</h3>
-          <div className="notifications-list flex flex-col gap-4">
-            <div className="notification-item flex gap-3">
-              <div className="mt-1"><span className="status-dot warning"></span></div>
-              <div>
-                <p className="text-sm font-medium">5 user belum workout 3+ hari</p>
-                <p className="text-xs text-muted">2 jam lalu</p>
+        <div className="card notification-card">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold">Notifikasi Terbaru</h3>
+            <span className="notif-badge">3 baru</span>
+          </div>
+          <div className="notifications-list">
+            <div className="notification-item">
+              <div className="notif-dot-wrap warning">
+                <span className="status-dot warning"></span>
               </div>
+              <div className="notif-content">
+                <p className="notif-text">5 user belum workout 3+ hari</p>
+                <p className="notif-time">2 jam lalu</p>
+              </div>
+              <span className="notif-label warning">Peringatan</span>
             </div>
-            <div className="notification-item flex gap-3">
-              <div className="mt-1"><span className="status-dot success"></span></div>
-              <div>
-                <p className="text-sm font-medium">12 user mencapai target minggu ini</p>
-                <p className="text-xs text-muted">5 jam lalu</p>
+            <div className="notification-item">
+              <div className="notif-dot-wrap success">
+                <span className="status-dot success"></span>
               </div>
+              <div className="notif-content">
+                <p className="notif-text">12 user mencapai target minggu ini</p>
+                <p className="notif-time">5 jam lalu</p>
+              </div>
+              <span className="notif-label success">Pencapaian</span>
             </div>
-            <div className="notification-item flex gap-3">
-              <div className="mt-1"><span className="status-dot" style={{backgroundColor: '#3b82f6'}}></span></div>
-              <div>
-                <p className="text-sm font-medium">28 user baru bergabung minggu ini</p>
-                <p className="text-xs text-muted">1 hari lalu</p>
+            <div className="notification-item">
+              <div className="notif-dot-wrap info">
+                <span className="status-dot" style={{backgroundColor: '#3b82f6'}}></span>
               </div>
+              <div className="notif-content">
+                <p className="notif-text">28 user baru bergabung minggu ini</p>
+                <p className="notif-time">1 hari lalu</p>
+              </div>
+              <span className="notif-label info">Info</span>
             </div>
           </div>
 
