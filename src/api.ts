@@ -3,7 +3,7 @@
 // Konfigurasi sentral untuk semua panggilan API ke backend Railway
 // ─────────────────────────────────────────────────────────────────────
 
-export const BASE_URL = 'https://godietadmin-production.up.railway.app';
+export const BASE_URL = 'https://web-production-78ab8.up.railway.app';
 
 /** Ambil admin ID dari localStorage (disimpan saat login berhasil) */
 export function getAdminId(): string {
