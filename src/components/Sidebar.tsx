@@ -1,7 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, UtensilsCrossed, Activity, BarChart2, LogOut } from 'lucide-react';
 import './Sidebar.css';
-import logoImg from '../assets/logo.png';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -17,9 +16,11 @@ const Sidebar = () => {
     <aside className="sidebar">
       {/* Logo */}
       <div className="logo-container">
-        <img src={logoImg} alt="GoDiet Logo" className="logo-image" style={{ height: '60px', objectFit: 'contain' }} />
-        {/* Jika ingin ada teks di bawah logo, aktifkan baris di bawah ini: */}
-        {/* <p className="logo-sub">Admin Panel</p> */}
+        <h2 className="logo-text">
+          <span style={{ color: '#22c55e', fontStyle: 'italic' }}>GO</span>
+          <span style={{ color: '#6b7280' }}>DIET</span>
+        </h2>
+        <p className="logo-sub">Admin Panel</p>
       </div>
 
       {/* Nav Menu */}
