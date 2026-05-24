@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, RefreshCw, Trash2, Eye, AlertCircle, CheckCircle, Clock } from 'lucide-react';
-import { fetchReports, deleteReport, type Report } from '../api';
+import { fetchReports, deleteReport, updateReportStatus, type Report } from '../api';
 
 import './Reports.css';
 
@@ -76,6 +76,27 @@ const Reports = () => {
     setReports(prev => prev.filter(r => r.id_report !== id));
     if (selected?.id_report === id) setSelected(null);
     setDeleting(null);
+  };
+
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+
+  const handleUpdateStatus = async (id: string, newStatus: 'resolved' | 'rejected') => {
+    setUpdatingStatus(id);
+    try {
+      const res = await updateReportStatus(id, newStatus);
+      if (res.success) {
+        setReports(prev => prev.map(r => r.id_report === id ? { ...r, status: newStatus } : r));
+        if (selected?.id_report === id) {
+          setSelected(prev => prev ? { ...prev, status: newStatus } : null);
+        }
+      } else {
+        alert(res.message || 'Gagal mengubah status laporan.');
+      }
+    } catch {
+      alert('Error koneksi saat memperbarui status.');
+    } finally {
+      setUpdatingStatus(null);
+    }
   };
 
   const tabs = ['Semua', 'Menunggu', 'Selesai', 'Ditolak'];
@@ -261,6 +282,27 @@ const Reports = () => {
                 {(statusConfig[selected.status] ?? statusConfig['pending']).icon}
                 {(statusConfig[selected.status] ?? { label: selected.status }).label}
               </span>
+              
+              {selected.status === 'pending' && (
+                <div className="detail-actions">
+                  <button
+                    className="resolve-btn"
+                    disabled={updatingStatus === selected.id_report}
+                    onClick={() => handleUpdateStatus(selected.id_report, 'resolved')}
+                  >
+                    <CheckCircle size={14} />
+                    Selesai
+                  </button>
+                  <button
+                    className="reject-btn"
+                    disabled={updatingStatus === selected.id_report}
+                    onClick={() => handleUpdateStatus(selected.id_report, 'rejected')}
+                  >
+                    <AlertCircle size={14} />
+                    Tolak
+                  </button>
+                </div>
+              )}
             </div>
 
             <button

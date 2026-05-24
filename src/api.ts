@@ -104,6 +104,16 @@ export async function deleteReport(id_report: string) {
   return res.json();
 }
 
+export async function updateReportStatus(id_report: string, status: string) {
+  const res = await fetch(`${BASE_URL}/api/admin/reports/${id_report}/status`, {
+    method: 'PUT',
+    headers: adminHeaders(),
+    body: JSON.stringify({ status }),
+  });
+  return res.json();
+}
+
+
 // ── TYPES ─────────────────────────────────────────────────────────────
 
 export interface Report {
