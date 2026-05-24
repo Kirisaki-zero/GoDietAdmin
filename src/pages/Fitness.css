@@ -82,3 +82,39 @@
   color: var(--color-danger);
   border-color: rgba(239, 68, 68, 0.2);
 }
+
+/* ── Loading Spinner ─────────────────────────────────────── */
+.fitness-page .loading-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #22c55e;
+  border-radius: 50%;
+  animation: ft-spin 0.75s linear infinite;
+}
+@keyframes ft-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Empty Chart ─────────────────────────────────────────── */
+.fitness-page .empty-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 120px;
+}
+
+/* ── Retry Button ────────────────────────────────────────── */
+.fitness-page .btn-retry {
+  padding: 8px 24px;
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.fitness-page .btn-retry:hover { background: #16a34a; }

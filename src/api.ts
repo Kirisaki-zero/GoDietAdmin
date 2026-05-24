@@ -36,6 +36,11 @@ export async function fetchStats() {
   return res.json();
 }
 
+export async function fetchFitnessData() {
+  const res = await fetch(`${BASE_URL}/api/admin/fitness`, { headers: adminHeaders() });
+  return res.json();
+}
+
 // ── USERS ─────────────────────────────────────────────────────────────
 
 export async function fetchUsers() {

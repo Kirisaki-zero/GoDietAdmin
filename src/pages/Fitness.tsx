@@ -1,48 +1,46 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   AreaChart, Area,
   BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { Users, Target, Activity, Zap, Search, Flame } from 'lucide-react';
+import { Users, Target, Activity, Zap, Search, Flame, AlertTriangle } from 'lucide-react';
 import StatCard from '../components/StatCard';
+import { fetchFitnessData } from '../api';
 import './Fitness.css';
 
-// ── Data statis ────────────────────────────────────────────────────────
-const weeklySessionsData = [
-  { name: 'Sen', sessions: 320 },
-  { name: 'Sel', sessions: 410 },
-  { name: 'Rab', sessions: 380 },
-  { name: 'Kam', sessions: 450 },
-  { name: 'Jum', sessions: 390 },
-  { name: 'Sab', sessions: 520 },
-  { name: 'Min', sessions: 280 },
-];
+// ── Types ─────────────────────────────────────────────────────────────────
+interface FitnessUser {
+  id: string;
+  id_user: string;
+  name: string;
+  initials: string;
+  program: string;
+  bmi: number | null;
+  compliance: number;
+  streak: number;
+  status: 'OK' | 'Warn' | 'Off';
+  lastWorkout: string;
+  totalKalori: number;
+}
 
-const complianceTrendData = [
-  { name: 'W1', rate: 72 },
-  { name: 'W2', rate: 75 },
-  { name: 'W3', rate: 73 },
-  { name: 'W4', rate: 79 },
-  { name: 'W5', rate: 82 },
-  { name: 'W6', rate: 85 },
-  { name: 'W7', rate: 87 },
-];
+interface FitnessData {
+  totalUserFitness: number;
+  countOK: number;
+  countWarn: number;
+  countOff: number;
+  avgCompliance: number;
+  weeklySessionsData: Array<{ name: string; sessions: number }>;
+  complianceTrendData: Array<{ name: string; rate: number }>;
+  fitnessUsers: FitnessUser[];
+}
 
-const fitnessUsersData = [
-  { id: 'SW', name: 'Sarah Wijaya',    weightChange: '62kg → 58kg', program: 'Fat Loss',     bmi: 22.1, compliance: 94, streak: 21, status: 'OK',   lastWorkout: 'Hari ini',   avatarClass: 'avatar-sw' },
-  { id: 'AP', name: 'Andi Pratama',    weightChange: '78kg → 82kg', program: 'Muscle Gain',  bmi: 24.5, compliance: 88, streak: 14, status: 'OK',   lastWorkout: 'Hari ini',   avatarClass: 'avatar-ap' },
-  { id: 'DL', name: 'Dewi Lestari',    weightChange: '72kg → 65kg', program: 'Fat Loss',     bmi: 26.3, compliance: 85, streak: 18, status: 'OK',   lastWorkout: 'Kemarin',    avatarClass: 'avatar-dl' },
-  { id: 'BS', name: 'Budi Santoso',    weightChange: '75kg → 74kg', program: 'Maintenance',  bmi: 23.8, compliance: 62, streak:  3, status: 'Warn', lastWorkout: '3 hari lalu', avatarClass: 'avatar-bs' },
-  { id: 'RK', name: 'Rina Kusuma',     weightChange: '56kg → 55kg', program: 'Health',       bmi: 21.5, compliance: 79, streak: 12, status: 'OK',   lastWorkout: 'Kemarin',    avatarClass: 'avatar-rk' },
-  { id: 'FH', name: 'Fajar Hidayat',   weightChange: '88kg → 78kg', program: 'Fat Loss',     bmi: 28.1, compliance: 45, streak:  0, status: 'Off',  lastWorkout: '5 hari lalu', avatarClass: 'avatar-fh' },
-  { id: 'MS', name: 'Maya Sari',       weightChange: '60kg → 63kg', program: 'Muscle Gain',  bmi: 22.9, compliance: 55, streak:  1, status: 'Warn', lastWorkout: '2 hari lalu', avatarClass: 'avatar-ms' },
-  { id: 'RA', name: 'Riko Aditya',     weightChange: '85kg → 75kg', program: 'Fat Loss',     bmi: 27.5, compliance: 38, streak:  0, status: 'Off',  lastWorkout: '7 hari lalu', avatarClass: 'avatar-ra' },
-  { id: 'SN', name: 'Siti Nurhaliza',  weightChange: '58kg → 57kg', program: 'Maintenance',  bmi: 22.0, compliance: 91, streak: 16, status: 'OK',   lastWorkout: 'Hari ini',   avatarClass: 'avatar-sn' },
-  { id: 'DP', name: 'Dimas Prasetyo',  weightChange: '82kg → 85kg', program: 'Muscle Gain',  bmi: 25.2, compliance: 72, streak:  5, status: 'Warn', lastWorkout: 'Kemarin',    avatarClass: 'avatar-dp' },
-];
+const DEFAULT_DATA: FitnessData = {
+  totalUserFitness: 0, countOK: 0, countWarn: 0, countOff: 0, avgCompliance: 0,
+  weeklySessionsData: [], complianceTrendData: [], fitnessUsers: [],
+};
 
-// ── Helper UI ──────────────────────────────────────────────────────────
+// ── Helper UI ──────────────────────────────────────────────────────────────
 const getStatusBadge = (status: string) => {
   switch (status) {
     case 'OK':   return <span className="status-badge status-ok">  <span className="status-dot success"></span> OK</span>;
@@ -58,110 +56,153 @@ const getComplianceColor = (val: number) => {
   return 'var(--color-danger)';
 };
 
-const getBmiColor = (bmi: number) => {
-  if (bmi < 18.5)              return 'var(--color-warning)';
-  if (bmi >= 18.5 && bmi < 25) return 'var(--color-success)';
+const getBmiColor = (bmi: number | null) => {
+  if (bmi === null)              return 'var(--color-text-muted)';
+  if (bmi < 18.5)               return 'var(--color-warning)';
+  if (bmi >= 18.5 && bmi < 25)  return 'var(--color-success)';
   return 'var(--color-danger)';
 };
 
-// ── Komponen utama ─────────────────────────────────────────────────────
+function getAvatarColor(name: string): string {
+  const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316'];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+
+// ── Komponen utama ─────────────────────────────────────────────────────────
 const Fitness = () => {
   const [activeFilter, setActiveFilter] = useState('Semua');
   const [searchTerm,   setSearchTerm]   = useState('');
+  const [data,  setData]    = useState<FitnessData>(DEFAULT_DATA);
+  const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState(false);
 
-  // Hitung jumlah per kategori (sekali, tidak bergantung filter)
-  const countOK   = fitnessUsersData.filter(u => u.status === 'OK').length;
-  const countWarn = fitnessUsersData.filter(u => u.status === 'Warn').length;
-  const countOff  = fitnessUsersData.filter(u => u.status === 'Off').length;
-  const avgCompliance = Math.round(
-    fitnessUsersData.reduce((acc, u) => acc + u.compliance, 0) / fitnessUsersData.length
-  );
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(false);
+      const res = await fetchFitnessData();
+      if (res.success) {
+        setData({ ...DEFAULT_DATA, ...res });
+      } else {
+        setError(true);
+      }
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   // Filter berdasarkan tab + pencarian
   const displayedUsers = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
-    return fitnessUsersData.filter(user => {
+    return data.fitnessUsers.filter(user => {
       const matchSearch =
         !q ||
         user.name.toLowerCase().includes(q) ||
         user.program.toLowerCase().includes(q);
 
       const matchTab =
-        activeFilter === 'Semua'           ||
-        (activeFilter === 'On Track'       && user.status === 'OK')   ||
+        activeFilter === 'Semua'            ||
+        (activeFilter === 'On Track'        && user.status === 'OK')   ||
         (activeFilter === 'Perlu Perhatian' && user.status === 'Warn') ||
-        (activeFilter === 'Tidak Aktif'    && user.status === 'Off');
+        (activeFilter === 'Tidak Aktif'     && user.status === 'Off');
 
       return matchSearch && matchTab;
     });
-  }, [activeFilter, searchTerm]);
+  }, [activeFilter, searchTerm, data.fitnessUsers]);
 
-  // Konfigurasi tombol filter (label + badge opsional)
   const filterTabs = [
     { label: 'Semua',           badge: null },
     { label: 'On Track',        badge: null },
-    { label: 'Perlu Perhatian', badge: { count: countWarn, cls: 'warning' } },
-    { label: 'Tidak Aktif',     badge: { count: countOff,  cls: 'danger'  } },
+    { label: 'Perlu Perhatian', badge: data.countWarn > 0 ? { count: data.countWarn, cls: 'warning' } : null },
+    { label: 'Tidak Aktif',     badge: data.countOff  > 0 ? { count: data.countOff,  cls: 'danger'  } : null },
   ];
 
+  const avgWeeklySessions = data.weeklySessionsData.length > 0
+    ? Math.round(data.weeklySessionsData.reduce((s, d) => s + d.sessions, 0) / data.weeklySessionsData.length)
+    : 0;
+
+  // ── Loading ────────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="fitness-page fade-in" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column' }}>
+        <div className="loading-spinner" />
+        <p className="chart-subtitle" style={{ marginTop: 16 }}>Memuat data kebugaran...</p>
+      </div>
+    );
+  }
+
+  // ── Error ──────────────────────────────────────────────────────────────
+  if (error) {
+    return (
+      <div className="fitness-page fade-in" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 12 }}>
+        <AlertTriangle size={40} color="#ef4444" />
+        <p style={{ color: '#ef4444', fontWeight: 600 }}>Gagal memuat data kebugaran</p>
+        <button onClick={loadData} className="btn-retry">🔄 Coba Lagi</button>
+      </div>
+    );
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────
   return (
     <div className="fitness-page fade-in">
       <h1 className="page-title">Kebugaran</h1>
 
-      {/* ── StatCard (nilai dinamis dari data) ─── */}
+      {/* ── StatCard ─── */}
       <div className="grid-stats">
         <StatCard
           title="Total User Fitness"
-          value={String(fitnessUsersData.length)}
+          value={String(data.totalUserFitness)}
           subtitle="Terdaftar"
           subtitleColor="success"
           icon={<Users size={20} />}
-          iconBgColor="#dcfce7"
-          iconColor="#22c55e"
+          iconBgColor="#dcfce7" iconColor="#22c55e"
         />
         <StatCard
           title="On Track"
-          value={String(countOK)}
-          subtitle={`${Math.round((countOK / fitnessUsersData.length) * 100)}% optimal`}
+          value={String(data.countOK)}
+          subtitle={data.totalUserFitness > 0 ? `${Math.round((data.countOK / data.totalUserFitness) * 100)}% optimal` : '0% optimal'}
           subtitleColor="success"
           icon={<Target size={20} />}
-          iconBgColor="#e0e7ff"
-          iconColor="#3b82f6"
+          iconBgColor="#e0e7ff" iconColor="#3b82f6"
         />
         <StatCard
           title="Perlu Perhatian"
-          value={String(countWarn)}
+          value={String(data.countWarn)}
           subtitle="Butuh follow-up"
           subtitleColor="warning"
           icon={<Activity size={20} />}
-          iconBgColor="#ffedd5"
-          iconColor="#f97316"
+          iconBgColor="#ffedd5" iconColor="#f97316"
         />
         <StatCard
           title="Avg Compliance"
-          value={`${avgCompliance}%`}
-          subtitle="↗ +5% vs minggu lalu"
+          value={`${data.avgCompliance}%`}
+          subtitle={data.avgCompliance >= 70 ? '↗ Performa bagus' : '↘ Perlu ditingkatkan'}
           subtitleColor="info"
           icon={<Zap size={20} />}
-          iconBgColor="#fae8ff"
-          iconColor="#d946ef"
+          iconBgColor="#fae8ff" iconColor="#d946ef"
         />
       </div>
 
-      {/* ── Grafik ─────────────────────────────── */}
+      {/* ── Grafik ─── */}
       <div className="grid-charts mt-6">
         {/* Bar chart sesi mingguan */}
         <div className="card chart-card">
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="chart-title">Workout Sessions Mingguan</h3>
-              <p className="chart-subtitle">Total sessions per hari</p>
+              <p className="chart-subtitle">Total sessions per hari (7 hari terakhir)</p>
             </div>
-            <div className="badge badge-success bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-semibold">↗ +18%</div>
+            <div className="badge badge-success">Avg {avgWeeklySessions}</div>
           </div>
           <div className="chart-container">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklySessionsData}>
+              <BarChart data={data.weeklySessionsData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
@@ -177,31 +218,39 @@ const Fitness = () => {
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="chart-title">Compliance Rate Trend</h3>
-              <p className="chart-subtitle">Rata-rata kepatuhan user</p>
+              <p className="chart-subtitle">Rata-rata kepatuhan user per minggu</p>
             </div>
-            <div className="badge badge-info bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-semibold">↗ {avgCompliance}%</div>
+            <div className="badge badge-info" style={{ backgroundColor: '#e0e7ff', color: '#3b82f6' }}>
+              {data.avgCompliance}%
+            </div>
           </div>
           <div className="chart-container">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={complianceTrendData}>
-                <defs>
-                  <linearGradient id="colorCompliance" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}   />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
-                <YAxis domain={[60, 100]} axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} tickFormatter={v => `${v}%`} />
-                <Tooltip />
-                <Area type="monotone" dataKey="rate" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorCompliance)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            {data.complianceTrendData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data.complianceTrendData}>
+                  <defs>
+                    <linearGradient id="colorCompliance" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}   />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} tickFormatter={v => `${v}%`} />
+                  <Tooltip formatter={(v: unknown) => [`${v}%`, 'Compliance']} />
+                  <Area type="monotone" dataKey="rate" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorCompliance)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="empty-chart">
+                <p className="chart-subtitle">Belum ada data (workout belum ter-sync)</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* ── Tabel dengan filter & search ───────── */}
+      {/* ── Tabel dengan filter & search ─── */}
       <div className="card mt-6 p-0 overflow-hidden">
         {/* Header tabel */}
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
@@ -251,26 +300,37 @@ const Fitness = () => {
               {displayedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-                    Tidak ada data yang cocok.
+                    {data.fitnessUsers.length === 0 ? 'Belum ada user terdaftar.' : 'Tidak ada data yang cocok.'}
                   </td>
                 </tr>
               ) : (
                 displayedUsers.map(user => (
-                  <tr key={user.id}>
+                  <tr key={user.id_user}>
                     {/* User */}
                     <td>
                       <div className="user-info">
-                        <div className={`avatar ${user.avatarClass}`}>{user.id}</div>
+                        <div
+                          className="avatar"
+                          style={{ backgroundColor: getAvatarColor(user.name) }}
+                        >
+                          {user.initials}
+                        </div>
                         <div className="flex flex-col">
                           <span className="font-semibold">{user.name}</span>
-                          <span className="text-xs text-muted font-medium flex items-center gap-1">{user.weightChange}</span>
+                          {user.totalKalori > 0 && (
+                            <span className="text-xs text-muted font-medium">
+                              🔥 {user.totalKalori.toLocaleString('id-ID')} kcal/30 hari
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
                     {/* Program */}
                     <td className="font-medium text-sm">{user.program}</td>
                     {/* BMI */}
-                    <td className="font-bold text-sm" style={{ color: getBmiColor(user.bmi) }}>{user.bmi}</td>
+                    <td className="font-bold text-sm" style={{ color: getBmiColor(user.bmi) }}>
+                      {user.bmi !== null ? user.bmi : '—'}
+                    </td>
                     {/* Compliance */}
                     <td>
                       <div className="flex items-center gap-3">
