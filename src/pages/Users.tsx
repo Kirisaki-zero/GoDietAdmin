@@ -114,8 +114,15 @@ export default function Users() {
             return (
               <div key={user.id_user} className="user-card" onClick={() => setDetailUser(user)}>
                 <div className="user-card-top">
-                  <div className="user-avatar" style={{ background: getAvatarColor(user.email) }}>
-                    {getInitials(user.nama, user.email)}
+                  <div 
+                    className="user-avatar" 
+                    style={user.foto_profil ? { background: 'none' } : { background: getAvatarColor(user.email) }}
+                  >
+                    {user.foto_profil ? (
+                      <img src={user.foto_profil} alt={user.nama || 'Avatar'} />
+                    ) : (
+                      getInitials(user.nama, user.email)
+                    )}
                   </div>
                   <div className="user-info">
                     <h4 className="user-name">{user.nama || '(Belum diisi)'}</h4>
@@ -179,8 +186,15 @@ export default function Users() {
             <div className="detail-body">
               {/* Avatar */}
               <div className="detail-avatar-section">
-                <div className="detail-avatar" style={{ background: getAvatarColor(detailUser.email) }}>
-                  {getInitials(detailUser.nama, detailUser.email)}
+                <div 
+                  className="detail-avatar" 
+                  style={detailUser.foto_profil ? { background: 'none' } : { background: getAvatarColor(detailUser.email) }}
+                >
+                  {detailUser.foto_profil ? (
+                    <img src={detailUser.foto_profil} alt={detailUser.nama || 'Avatar'} />
+                  ) : (
+                    getInitials(detailUser.nama, detailUser.email)
+                  )}
                 </div>
                 <h2 className="detail-name">{detailUser.nama || '(Nama belum diisi)'}</h2>
                 <p className="detail-email">{detailUser.email}</p>

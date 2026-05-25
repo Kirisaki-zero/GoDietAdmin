@@ -150,4 +150,5 @@ export interface User {
   usia: number;
   jenis_kelamin: string;
   tingkat_aktivitas: string;
+  foto_profil?: string;
 }
