@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, UtensilsCrossed, Activity, BarChart2, LogOut } from 'lucide-react';
 import './Sidebar.css';
-import logoImg from '../assets/logo.png';
+import logoImg from '../assets/image.png';
 
 const Sidebar = () => {
   const navigate = useNavigate();
